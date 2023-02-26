@@ -14,15 +14,18 @@ const handle = async () => {
   try {
     const response = await fetch(eventsUrl);
     if (!response.ok) {
+      console.error("Response status", response.status);
       return new Response("Failed to fetch events", { status: 502 });
     }
     body = await response.json();
-  } catch {
+  } catch (error) {
+    console.error(error);
     return new Response("Failed to fetch events", { status: 502 });
   }
 
   const eventsResult = DiscourseEvent.array().safeParse(body?.events);
   if (!eventsResult.success) {
+    console.error(eventsResult.error);
     return new Response("Fetched events have invalid shape", { status: 502 });
   }
   const events = eventsResult.data;
