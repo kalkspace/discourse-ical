@@ -31,7 +31,7 @@ export const DiscourseEvent = z.object({
 
 export const rruleFromRecurrence = (
   recurrence: DiscourseEventRecurrence
-): RecurrenceRule => {
+): RecurrenceRule | undefined => {
   if (recurrence === "every_day") {
     return { freq: "DAILY" };
   }
@@ -45,10 +45,12 @@ export const rruleFromRecurrence = (
     return { freq: "WEEKLY", interval: 2 };
   }
   if (recurrence === "every_month") {
-    return { freq: "MONTHLY" };
+    // TODO: not supported yet
+    // how to express "every month at this weekday"?
+    // would have to also pass initial date and determine nth weekday
+    // return { freq: "MONTHLY" };
   }
   if (recurrence === "every_year") {
     return { freq: "YEARLY" };
   }
-  return recurrence;
 };
