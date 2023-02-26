@@ -6,12 +6,13 @@ import {
 } from "https://deno.land/x/simple_ics@0.1.0/mod.ts";
 import { DiscourseEvent, rruleFromRecurrence } from "./discourse-calendar.ts";
 
+const discourseUrl = Deno.env.get("DISCOURSE_URL");
+
 const handle = async () => {
   let body;
+  const eventsUrl = new URL("/discourse-post-event/events.json", discourseUrl);
   try {
-    const response = await fetch(
-      "https://discuss.kalk.space/discourse-post-event/events.json"
-    );
+    const response = await fetch(eventsUrl);
     if (!response.ok) {
       return new Response("Failed to fetch events", { status: 502 });
     }
@@ -26,7 +27,6 @@ const handle = async () => {
   }
   const events = eventsResult.data;
 
-  const baseUrl = "https://discuss.kalk.space";
   const hour = 60 * 60 * 1000;
 
   const calendarEvents = events
@@ -45,7 +45,9 @@ const handle = async () => {
           : { duration: 3600 }),
         url:
           event.url ||
-          (event.post?.url ? `${baseUrl}${event.post.url}` : undefined),
+          (event.post?.url
+            ? new URL(event.post.url, discourseUrl).toString()
+            : undefined),
         rrule: event.recurrence
           ? rruleFromRecurrence(event.recurrence)
           : undefined,
