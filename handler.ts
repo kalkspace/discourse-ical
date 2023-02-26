@@ -37,17 +37,20 @@ const handle = async () => {
         new Date(event.starts_at) > new Date(Date.now() - 24 * hour)
     )
     .map((event) => {
+      const url =
+        event.url ||
+        (event.post?.url
+          ? new URL(event.post.url, discourseUrl).toString()
+          : undefined);
+
       const eventConfig: EventConfig = {
         title: event.name || event.post?.topic?.title || "Unnamed event",
         beginDate: new Date(event.starts_at),
         ...(event.ends_at
           ? { endDate: new Date(event.ends_at) }
           : { duration: 3600 }),
-        url:
-          event.url ||
-          (event.post?.url
-            ? new URL(event.post.url, discourseUrl).toString()
-            : undefined),
+        url,
+        desc: url,
         rrule: event.recurrence
           ? rruleFromRecurrence(event.recurrence)
           : undefined,
