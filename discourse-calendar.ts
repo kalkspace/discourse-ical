@@ -3,7 +3,7 @@ import {
   ICalEventData,
   ICalEventRepeatingFreq,
   ICalWeekday,
-} from "npm:ical-generator@3.6.1";
+} from "https://esm.sh/v108/ical-generator@3.6.1";
 
 const DiscourseEventRecurrence = z.enum([
   "every_day",
