@@ -65,7 +65,7 @@ export const repeatingFromRecurrence = (
 
     const weekNumber = Math.floor(start.getDate() / 7) + 1;
 
-    return `RRULE:FREQ=MONTHLY;BYWEEKNO=${weekNumber};BYDAY=${weekday}`;
+    return `RRULE:FREQ=MONTHLY;BYDAY=${weekNumber}${weekday}`;
   }
   if (recurrence === "every_year") {
     return { freq: ICalEventRepeatingFreq.YEARLY };
