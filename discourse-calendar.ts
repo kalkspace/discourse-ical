@@ -4,6 +4,7 @@ import {
   ICalEventRepeatingFreq,
   ICalWeekday,
 } from "https://esm.sh/v108/ical-generator@3.6.1";
+import { RRule } from "https://esm.sh/v108/rrule@2.7.2";
 
 const DiscourseEventRecurrence = z.enum([
   "every_day",
@@ -60,12 +61,25 @@ export const repeatingFromRecurrence = (
   }
   if (recurrence === "every_month") {
     const weekdayIndex = start.getDay();
-    const weekdays = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+    const weekdays = [
+      RRule.SU,
+      RRule.MO,
+      RRule.TU,
+      RRule.WE,
+      RRule.TH,
+      RRule.FR,
+      RRule.SA,
+    ];
     const weekday = weekdays[weekdayIndex];
 
     const weekNumber = Math.floor(start.getDate() / 7) + 1;
 
-    return `RRULE:FREQ=MONTHLY;BYDAY=${weekNumber}${weekday}`;
+    const rrule = new RRule({
+      freq: RRule.MONTHLY,
+      byweekday: weekday.nth(weekNumber),
+    });
+
+    return rrule.toString();
   }
   if (recurrence === "every_year") {
     return { freq: ICalEventRepeatingFreq.YEARLY };
