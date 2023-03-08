@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import {
-  Event,
-  EventConfig,
-  Calendar,
-} from "https://deno.land/x/simple_ics@0.1.0/mod.ts";
-import { DiscourseEvent, rruleFromRecurrence } from "./discourse-calendar.ts";
+  DiscourseEvent,
+  repeatingFromRecurrence,
+} from "./discourse-calendar.ts";
+import ical, { ICalEventData } from "npm:ical-generator@3.6.1";
+import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
 
 const discourseUrl = Deno.env.get("DISCOURSE_URL");
 
@@ -23,14 +23,24 @@ const handle = async () => {
     return new Response("Failed to fetch events", { status: 502 });
   }
 
-  const eventsResult = DiscourseEvent.array().safeParse(body?.events);
-  if (!eventsResult.success) {
-    console.error(eventsResult.error);
-    return new Response("Fetched events have invalid shape", { status: 502 });
+  const anyArrayResult = z.array(z.any()).safeParse(body?.events);
+  if (!anyArrayResult.success) {
+    console.error(anyArrayResult.error);
+    return new Response("Fetched events were not an array", { status: 502 });
   }
-  const events = eventsResult.data;
+
+  const events = anyArrayResult.data.flatMap((a) => {
+    const result = DiscourseEvent.safeParse(a);
+    if (!result.success) {
+      console.warn("Invalid event object", result.error);
+      return [];
+    }
+    return [result.data];
+  });
 
   const hour = 60 * 60 * 1000;
+
+  const calendar = ical({ name: discourseUrl, timezone: "Europe/Berlin" });
 
   const calendarEvents = events
     // TODO: filter by ends_at
@@ -40,22 +50,24 @@ const handle = async () => {
         new Date(event.starts_at) > new Date(Date.now() - 24 * hour)
     )
     .map((event) => {
+      const start = new Date(event.starts_at);
+
       const url =
         event.url ||
         (event.post?.url
           ? new URL(event.post.url, discourseUrl).toString()
           : undefined);
 
-      const eventConfig: EventConfig = {
-        title: event.name || event.post?.topic?.title || "Unnamed event",
-        beginDate: new Date(event.starts_at),
+      const eventConfig: ICalEventData = {
+        summary: event.name || event.post?.topic?.title || "Unnamed event",
+        start,
         ...(event.ends_at
           ? { endDate: new Date(event.ends_at) }
           : { duration: 3600 }),
         url,
-        desc: url,
-        rrule: event.recurrence
-          ? rruleFromRecurrence(event.recurrence)
+        description: url,
+        repeating: event.recurrence
+          ? repeatingFromRecurrence(event.recurrence, start)
           : undefined,
         // TODO:
         // alarm: {
@@ -63,10 +75,12 @@ const handle = async () => {
         //   advance: 30,
         // },
       };
-      return new Event(eventConfig);
+      return eventConfig;
     });
 
-  const calendar = new Calendar(calendarEvents);
+  for (const calendarEvent of calendarEvents) {
+    calendar.createEvent(calendarEvent);
+  }
   return new Response(calendar.toString());
 };
 

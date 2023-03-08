@@ -1,5 +1,9 @@
-import { RecurrenceRule } from "https://deno.land/x/simple_ics@0.1.0/mod.ts";
 import { z } from "https://deno.land/x/zod@v3.20.5/mod.ts";
+import {
+  ICalEventData,
+  ICalEventRepeatingFreq,
+  ICalWeekday,
+} from "npm:ical-generator@3.6.1";
 
 const DiscourseEventRecurrence = z.enum([
   "every_day",
@@ -13,7 +17,7 @@ type DiscourseEventRecurrence = z.infer<typeof DiscourseEventRecurrence>;
 
 export const DiscourseEvent = z.object({
   name: z.string().nullable(),
-  starts_at: z.string().datetime().nullable(),
+  starts_at: z.string().datetime(),
   ends_at: z.string().datetime().nullable(),
   url: z.string().url().nullable(),
   recurrence: DiscourseEventRecurrence.nullable(),
@@ -29,28 +33,41 @@ export const DiscourseEvent = z.object({
     .nullable(),
 });
 
-export const rruleFromRecurrence = (
-  recurrence: DiscourseEventRecurrence
-): RecurrenceRule | undefined => {
+export const repeatingFromRecurrence = (
+  recurrence: DiscourseEventRecurrence,
+  start: Date
+): ICalEventData["repeating"] | undefined => {
   if (recurrence === "every_day") {
-    return { freq: "DAILY" };
+    return { freq: ICalEventRepeatingFreq.DAILY };
   }
   if (recurrence === "every_weekday") {
-    return { freq: "DAILY", byDay: ["MO", "TU", "WE", "TH", "FR"] };
+    return {
+      freq: ICalEventRepeatingFreq.DAILY,
+      byDay: [
+        ICalWeekday.MO,
+        ICalWeekday.TU,
+        ICalWeekday.WE,
+        ICalWeekday.TH,
+        ICalWeekday.FR,
+      ],
+    };
   }
   if (recurrence === "every_week") {
-    return { freq: "WEEKLY" };
+    return { freq: ICalEventRepeatingFreq.WEEKLY };
   }
   if (recurrence === "every_two_weeks") {
-    return { freq: "WEEKLY", interval: 2 };
+    return { freq: ICalEventRepeatingFreq.WEEKLY, interval: 2 };
   }
   if (recurrence === "every_month") {
-    // TODO: not supported yet
-    // how to express "every month at this weekday"?
-    // would have to also pass initial date and determine nth weekday
-    // return { freq: "MONTHLY" };
+    const weekdayIndex = start.getDay();
+    const weekdays = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+    const weekday = weekdays[weekdayIndex];
+
+    const weekNumber = Math.floor(start.getDate() / 7) + 1;
+
+    return `FREQ=MONTHLY;BYDAY=${weekNumber}${weekday}`;
   }
   if (recurrence === "every_year") {
-    return { freq: "YEARLY" };
+    return { freq: ICalEventRepeatingFreq.YEARLY };
   }
 };
