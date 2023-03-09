@@ -37,7 +37,7 @@ export const DiscourseEvent = z.object({
 export const repeatingFromRecurrence = (
   recurrence: DiscourseEventRecurrence,
   start: Date
-): ICalEventData["repeating"] | undefined => {
+): ICalEventData["repeating"] => {
   if (recurrence === "every_day") {
     return { freq: ICalEventRepeatingFreq.DAILY };
   }

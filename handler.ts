@@ -1,10 +1,10 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
+import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@3.6.1";
 import {
   DiscourseEvent,
   repeatingFromRecurrence,
 } from "./discourse-calendar.ts";
-import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@3.6.1";
-import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
 
 const discourseUrl = Deno.env.get("DISCOURSE_URL");
 
