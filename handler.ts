@@ -62,7 +62,7 @@ const handle = async () => {
         summary: event.name || event.post?.topic?.title || "Unnamed event",
         start,
         ...(event.ends_at
-          ? { endDate: new Date(event.ends_at) }
+          ? { end: new Date(event.ends_at) }
           : { duration: 3600 }),
         url,
         description: url,
