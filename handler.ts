@@ -40,7 +40,7 @@ const handle = async () => {
 
   const hour = 60 * 60 * 1000;
 
-  const calendar = ical({ name: discourseUrl, timezone: "Europe/Berlin" });
+  const calendar = ical({ name: discourseUrl });
 
   const calendarEvents = events
     // TODO: filter by ends_at
