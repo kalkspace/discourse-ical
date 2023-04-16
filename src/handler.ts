@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { Handler, serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
 import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@3.6.1";
 import {
@@ -8,11 +8,18 @@ import {
 
 const discourseUrl = Deno.env.get("DISCOURSE_URL");
 
-const handle = async () => {
-  let body;
+const handle: Handler = async (request) => {
   const eventsUrl = new URL("/discourse-post-event/events.json", discourseUrl);
+
+  const requestUrl = new URL(request.url);
+  const token = requestUrl.searchParams.get("token");
+
+  let body;
   try {
-    const response = await fetch(eventsUrl);
+    const response = await fetch(
+      eventsUrl,
+      token ? { headers: { Cookie: `_t=${token}` } } : undefined
+    );
     if (!response.ok) {
       console.error("Response status", response.status);
       return new Response("Failed to fetch events", { status: 502 });
@@ -81,9 +88,7 @@ const handle = async () => {
   for (const calendarEvent of calendarEvents) {
     calendar.createEvent(calendarEvent);
   }
-  return new Response(calendar.toString(), {
-    headers: { "Content-Type": "text/calendar" },
-  });
+  return new Response(calendar.toString());
 };
 
 serve(handle);
