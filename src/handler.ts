@@ -1,4 +1,5 @@
-import { Handler, serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { Handler, serve } from "https://deno.land/std@0.182.0/http/server.ts";
+import { generate } from "https://deno.land/std@0.182.0/uuid/v5.ts";
 import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
 import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@3.6.1";
 import {
@@ -7,6 +8,8 @@ import {
 } from "./discourse-calendar.ts";
 
 const discourseUrl = Deno.env.get("DISCOURSE_URL");
+
+const NAMESPACE_URL_UUID = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 
 const handle: Handler = async (request) => {
   const eventsUrl = new URL("/discourse-post-event/events.json", discourseUrl);
@@ -51,14 +54,14 @@ const handle: Handler = async (request) => {
 
   const calendar = ical({ name: discourseUrl });
 
-  const calendarEvents = events
+  const calendarEventPromises = events
     // TODO: filter by ends_at
     .filter(
       (event) =>
         event.starts_at &&
         new Date(event.starts_at) > new Date(Date.now() - 24 * hour)
     )
-    .map((event) => {
+    .map(async (event) => {
       const start = new Date(event.starts_at);
 
       const url =
@@ -68,6 +71,7 @@ const handle: Handler = async (request) => {
           : undefined);
 
       const eventConfig: ICalEventData = {
+        id: await generate(NAMESPACE_URL_UUID, new TextEncoder().encode(url)),
         summary: event.name || event.post?.topic?.title || "Unnamed event",
         start,
         ...(event.ends_at
@@ -86,6 +90,7 @@ const handle: Handler = async (request) => {
       };
       return eventConfig;
     });
+  const calendarEvents = await Promise.all(calendarEventPromises);
 
   for (const calendarEvent of calendarEvents) {
     calendar.createEvent(calendarEvent);
