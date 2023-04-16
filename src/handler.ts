@@ -90,7 +90,9 @@ const handle: Handler = async (request) => {
   for (const calendarEvent of calendarEvents) {
     calendar.createEvent(calendarEvent);
   }
-  return new Response(calendar.toString());
+  return new Response(calendar.toString(), {
+    headers: { "Content-Type": "text/calendar" },
+  });
 };
 
 serve(handle);
