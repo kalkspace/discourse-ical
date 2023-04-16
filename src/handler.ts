@@ -18,7 +18,9 @@ const handle: Handler = async (request) => {
   try {
     const response = await fetch(
       eventsUrl,
-      token ? { headers: { Cookie: `_t=${token}` } } : undefined
+      token
+        ? { headers: { Cookie: `_t=${encodeURIComponent(token)}` } }
+        : undefined
     );
     if (!response.ok) {
       console.error("Response status", response.status);
