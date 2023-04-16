@@ -82,11 +82,6 @@ const handle: Handler = async (request) => {
         repeating: event.recurrence
           ? repeatingFromRecurrence(event.recurrence, start)
           : undefined,
-        // TODO:
-        // alarm: {
-        //   desc: 'Write Rust NOW',
-        //   advance: 30,
-        // },
       };
       return eventConfig;
     });
