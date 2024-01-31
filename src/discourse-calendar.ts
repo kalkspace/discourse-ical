@@ -3,7 +3,7 @@ import {
   ICalEventData,
   ICalEventRepeatingFreq,
   ICalWeekday,
-} from "https://esm.sh/v108/ical-generator@3.6.1";
+} from "https://esm.sh/v108/ical-generator@6.0.1";
 import { RRule } from "https://esm.sh/v108/rrule@2.7.2";
 
 const DiscourseEventRecurrence = z.enum([
