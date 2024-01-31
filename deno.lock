@@ -31,9 +31,9 @@
     "https://deno.land/x/zod@v3.20.5/types.ts": "6ddc4608e70d75f2e06f9cc14aa406df4d80f420c0eef64f2f02d429853c0c38",
     "https://esm.sh/v108/ical-generator@6.0.1": "f8ae53cf7f5c871b94b6efaac303631e64fa335a91659f87b6a2f727b4c2b631",
     "https://esm.sh/v108/ical-generator@6.0.1/denonext/ical-generator.mjs": "a07d3ddf88c5e57318ee727d950231084a76fd3cf633722974385621c69f69b9",
-    "https://esm.sh/v108/rrule@2.7.2": "3fd21b3efb2942f7aeeb3f848f4e2105955ee22743f6b424e3092028224992f0",
-    "https://esm.sh/v108/rrule@2.7.2/deno/rrule.js": "3229f4ade2d06cc62a521742d1e13146e2162e5082bd4b8fcbe453e8f2912b7d",
-    "https://esm.sh/v108/tslib@2.5.0/deno/tslib.js": "48a974faa5eb9838d09f24ce962d756f4fafea66a2841d5062680b3ae599a86f",
+    "https://esm.sh/v108/rrule@2.7.2": "fdfef0dc87aa616b7b302540e6e7dca812708e792429d3651004300e39e60879",
+    "https://esm.sh/v108/rrule@2.7.2/denonext/rrule.mjs": "f0acf339dbe16e63695c3cacee5c4b2d0ade1740cff92013e849ff1b1abfe2a4",
+    "https://esm.sh/v108/tslib@2.6.2/denonext/tslib.mjs": "29782bcd3139f77ec063dc5a9385c0fff4a8d0a23b6765c73d9edeb169a04bf1",
     "https://esm.sh/v108/uuid-random@1.3.2/denonext/uuid-random.mjs": "708c479fcec71c88553e6efe1456f9c646f0153e22cb4d77239d00c80fb089c7"
   }
 }
