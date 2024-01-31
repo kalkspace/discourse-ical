@@ -14,7 +14,7 @@ const NAMESPACE_URL_UUID = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 
 const handle: Handler = async (request) => {
   const eventsUrl = new URL(
-    "/discourse-post-event/events?include_details=true",
+    "/discourse-post-event/events.json?include_details=true",
     discourseUrl
   );
 
