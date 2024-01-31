@@ -1,7 +1,7 @@
 import { Handler, serve } from "https://deno.land/std@0.182.0/http/server.ts";
 import * as v5 from "https://deno.land/std@0.182.0/uuid/v5.ts";
 import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
-import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@3.6.1";
+import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@6.0.1";
 import {
   DiscourseEvent,
   repeatingFromRecurrence,
