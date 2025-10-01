@@ -17,10 +17,10 @@ const DiscourseEventRecurrence = z.enum([
 type DiscourseEventRecurrence = z.infer<typeof DiscourseEventRecurrence>;
 
 export const DiscourseEvent = z.object({
+  id: z.number(),
   name: z.string().nullable(),
-  starts_at: z.string().datetime(),
-  ends_at: z.string().datetime().nullable(),
-  url: z.string().url().nullable(),
+  starts_at: z.string().datetime({ offset: true }),
+  ends_at: z.string().datetime({ offset: true }).nullable(),
   recurrence: DiscourseEventRecurrence.nullable(),
   post: z
     .object({

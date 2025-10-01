@@ -12,11 +12,13 @@ const discourseUrl = Deno.env.get("DISCOURSE_URL");
 // https://www.rfc-editor.org/rfc/rfc4122.html#appendix-C
 const NAMESPACE_URL_UUID = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 
+const hour = 60 * 60 * 1000;
+
 const handle: Handler = async (request) => {
-  const eventsUrl = new URL(
-    "/discourse-post-event/events.json?include_details=true",
-    discourseUrl
-  );
+  const oneMonthAgo = new Date(Date.now() - 28 * 24 * hour);
+  const eventsUrl = new URL("/discourse-post-event/events.json", discourseUrl);
+  eventsUrl.searchParams.set("include_details", "true");
+  eventsUrl.searchParams.set("after", oneMonthAgo.toISOString());
 
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token");
@@ -48,50 +50,38 @@ const handle: Handler = async (request) => {
   const events = anyArrayResult.data.flatMap((a) => {
     const result = DiscourseEvent.safeParse(a);
     if (!result.success) {
-      console.warn("Invalid event object", result.error);
+      console.warn("Invalid event object", a, result.error);
       return [];
     }
     return [result.data];
   });
 
-  const hour = 60 * 60 * 1000;
-
   const calendar = ical({ name: discourseUrl });
 
-  const calendarEventPromises = events
-    // TODO: filter by ends_at
-    .filter(
-      (event) =>
-        event.starts_at &&
-        new Date(event.starts_at) > new Date(Date.now() - 24 * hour)
-    )
-    .map(async (event) => {
-      const start = new Date(event.starts_at);
+  const calendarEventPromises = events.map(async (event) => {
+    const start = new Date(event.starts_at);
 
-      const url =
-        event.url ||
-        (event.post?.url
-          ? new URL(event.post.url, discourseUrl).toString()
-          : undefined);
+    const url =
+      event.post?.url && new URL(event.post.url, discourseUrl).toString();
 
-      const eventConfig: ICalEventData = {
-        id: await v5.generate(
-          NAMESPACE_URL_UUID,
-          new TextEncoder().encode(url)
-        ),
-        summary: event.name || event.post?.topic?.title || "Unnamed event",
-        start,
-        ...(event.ends_at
-          ? { end: new Date(event.ends_at) }
-          : { duration: 3600 }),
-        url,
-        description: url,
-        repeating: event.recurrence
-          ? repeatingFromRecurrence(event.recurrence, start)
-          : undefined,
-      };
-      return eventConfig;
-    });
+    const eventConfig: ICalEventData = {
+      id: await v5.generate(
+        NAMESPACE_URL_UUID,
+        new TextEncoder().encode(event.id.toString())
+      ),
+      summary: event.name || event.post?.topic?.title || "Unnamed event",
+      start,
+      ...(event.ends_at
+        ? { end: new Date(event.ends_at) }
+        : { duration: 3600 }),
+      url,
+      description: url,
+      repeating: event.recurrence
+        ? repeatingFromRecurrence(event.recurrence, start)
+        : undefined,
+    };
+    return eventConfig;
+  });
   const calendarEvents = await Promise.all(calendarEventPromises);
 
   for (const calendarEvent of calendarEvents) {
