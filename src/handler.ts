@@ -2,10 +2,7 @@ import { Handler, serve } from "https://deno.land/std@0.182.0/http/server.ts";
 import * as v5 from "https://deno.land/std@0.182.0/uuid/v5.ts";
 import { z } from "https://deno.land/x/zod@v3.20.5/index.ts";
 import ical, { ICalEventData } from "https://esm.sh/v108/ical-generator@6.0.1";
-import {
-  DiscourseEvent,
-  repeatingFromRecurrence,
-} from "./discourse-calendar.ts";
+import { DiscourseEvent } from "./discourse-calendar.ts";
 
 const discourseUrl = Deno.env.get("DISCOURSE_URL");
 
@@ -76,9 +73,7 @@ const handle: Handler = async (request) => {
         : { duration: 3600 }),
       url,
       description: url,
-      repeating: event.recurrence
-        ? repeatingFromRecurrence(event.recurrence, start)
-        : undefined,
+      repeating: event.rrule,
     };
     return eventConfig;
   });
